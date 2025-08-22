@@ -172,7 +172,7 @@ msg.host = "cdn.example.com";     // Override URL host
 - **`buffer`**: Returns file content as Node.js Buffer with metadata
 - **`base64`**: Returns ready-to-use data URI with MIME type
 - **`url`**: Returns only the file URL (no download)
-- **`url+type`**: Returns file URL with MIME type (HEAD request only)
+- **`url+metadata`**: Returns file URL with MIME type (HEAD request only)
 
 **Smart filename detection:**
 1. `msg.filename` or node config

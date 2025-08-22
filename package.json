@@ -1,12 +1,16 @@
 {
   "name": "node-red-contrib-pocketbase",
-  "version": "1.0.25",
+  "version": "1.0.26",
   "description": "PocketBase node for Node-RED",
   "main": "dist/pb-auth.js",
   "keywords": [
-    "node-red",
+    "pb",
     "pocketbase",
-    "auth"
+    "node-red",
+    "auth",
+    "crud",
+    "upload",
+    "download"
   ],
   "repository": {
     "type": "git",

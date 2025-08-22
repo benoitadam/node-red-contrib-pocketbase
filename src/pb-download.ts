@@ -8,7 +8,7 @@ export interface PBDownloadNodeDef extends NodeDef {
     filename: string;
     fields: string;
     host: string;
-    mode: 'buffer' | 'base64' | 'url' | 'url+type';
+    mode: 'buffer' | 'base64' | 'url' | 'url+metadata';
 }
 
 module.exports = (RED: NodeAPI) => {
@@ -39,7 +39,7 @@ module.exports = (RED: NodeAPI) => {
                     if (!id) throw pbPropError('Fields Or Record ID');
                     if (!filename) throw pbPropError('Fields Or Filename');
                 }
-                if (!['buffer', 'base64', 'url', 'url+type'].includes(mode)) throw pbPropError('Mode (buffer|base64|url|url+type)');
+                if (!['buffer', 'base64', 'url', 'url+metadata'].includes(mode)) throw pbPropError('Mode (buffer|base64|url|url+metadata)');
 
                 let newHost = host ? String(host).trim() : '';
                 if (newHost) {
@@ -58,11 +58,17 @@ module.exports = (RED: NodeAPI) => {
                     }
                     
                     result.url = url;
-                    if (mode === 'buffer' || mode === 'base64' || mode === 'url+type') {
-                        const response = await fetch(url, { method: mode === 'url+type' ? 'HEAD' : 'GET' });
+                    if (mode === 'buffer' || mode === 'base64' || mode === 'url+metadata') {
+                        const response = await fetch(url, { method: mode === 'url+metadata' ? 'HEAD' : 'GET' });
                         if (!response.ok) throw new Error(`Download failed id:${id} filename:${filename}: ${response.status} ${response.statusText}`);
-                        result.type = response.headers.get('content-type') || 'application/octet-stream';
                         
+                        result.type = response.headers.get('content-type') || 'application/octet-stream';
+
+                        const contentLength = response.headers.get('content-length');
+                        if (contentLength && !Number.isNaN(parseInt(contentLength))) {
+                            result.size = parseInt(contentLength);
+                        }
+    
                         if (mode === 'buffer') {
                             const arrayBuffer = await response.arrayBuffer();
                             result.buffer = Buffer.from(arrayBuffer);
@@ -71,7 +77,7 @@ module.exports = (RED: NodeAPI) => {
                             const base64 = Buffer.from(arrayBuffer).toString('base64');
                             result.base64 = `data:${result.type};base64,${base64}`;
                         }
-                        // mode === 'url+type' : just keep url and type, no download
+                        // mode === 'url+metadata' : just keep url, size and type, no download
                     }
                     return result;
                 });
